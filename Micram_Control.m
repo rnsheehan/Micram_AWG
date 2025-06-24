@@ -22,6 +22,61 @@ fopen (visObj);
 %set (visObj, 'Timeout', 10);
 %set (visObj, 'EOSMode', 'read');
 
+% equipment status labels
+dac4_init = false; % is the dac4 initialised? 
+hmc_status = false; % is the HMC-T2XXX output on? 
+
+% Initialise the DAC4 when calling the script for the first time
+
+disp('Does the DAC4 need to be initialised? '); 
+disp('Enter 1 to initialise DAC4')
+initialise_dac4 = input('Initialise DAC4?'); 
+
+if initialise_dac4 == 1
+	clear;
+	clear global md;
+	clear global fom;
+	global md;
+	format long;
+
+	%%%%%%%%%
+	% Board %
+	%%%%%%%%%
+	board='dac4board';
+	md.(board).ip='192.168.7.2'; % internal IP address beaglebone connection USB
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% path for the folder containing the calibration data %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	md.cal_data_path='C:\Users\Robert\Equipment\Equipment_Manuals\Micram\cal_data';
+
+	%%%%%%%%%%%%%%%%%
+	% DAC modules(s) %
+	%%%%%%%%%%%%%%%%%%
+
+	% Select which DAC modules should be used.
+	% 1         -> Module in socket 1 on master board
+	% 2         -> Module in socket 2 on master board
+	% 3         -> Module in socket 1 on slave board
+	% 4         -> Module in socket 2 on slave board
+	% [1 2]     -> Modules in both sockets on master board
+	% [1 2 3 4] -> Modules in both sockets on master and slave board
+	md.(board).devs=[1];
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% no configuration below %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%addpath([pwd() '\board_functions']);
+	%addpath([pwd() '\module_functions']);
+	%addpath([pwd() '\dac4_functions']);
+	%addpath([pwd() '\common_functions']);
+
+	board_init( board );
+	
+	dac4_init = true; 
+end
+
 % Simple menu allows you to operate the Micram AWG continuously
 % Define options for menu
 start = 'Options:\n';
@@ -35,11 +90,7 @@ option7 = 'Enable DAC4 Cosine Output: Input = 7\n'; %
 option8 = 'End program: Input = -1\n';
 message = 'Input: ';
 newline = '\n';
-prompt = strcat(newline, start, option1, option2, option3, option4, option5, option6, option7, option8, newline, message);
-
-% equipment status labels
-dac4_init = false; % is the dac4 initialised? 
-hmc_status = false; % is the HMC-T2XXX output on? 
+prompt = strcat(newline, start, option2, option3, option4, option5, option6, option7, option8, newline, message);
 
 % some constants for the twin-pulse pattern
 Ni = 10; % no. symbols with which twin-pulse pattern is buffered
@@ -57,10 +108,10 @@ while do
     if action == -1
         disp('End Program');
         do = false;
-    elseif action == 1
-        disp('Initialise DAC4');
-        run("setup_dac4.m"); % call the script to initialise the DAC4
-		dac4_init = true; 
+    %elseif action == 1
+    %    disp('Initialise DAC4');
+    %    run("setup_dac4.m"); % call the script to initialise the DAC4
+	%	dac4_init = true; 
     elseif action==2
         disp('Change Clock Frequency');
 		freq = input('Input Desired Clock Frequency in units of GHz: '); % input desired frequency in units of GHz
