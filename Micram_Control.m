@@ -145,7 +145,8 @@ while do
 		
 		% deltaTw is the width of the pulse that you want to excite the laser
 		frqVal = input('Input the required output frequency in units of GHz: ');
-		Hittite_Set_Frq(visObj, frqVal); 
+		clock_rate = 4.0 * frqVal; 
+		Hittite_Set_Frq(visObj, clock_rate); % output from DAC4 is clock-rate / 4
 		crhz, crghz = Hittite_Get_Freq(visObj); % read the actual clock rate
 		fprintf('Current Clock Frequency: %0.3f GHz\n',crghz);
 		
