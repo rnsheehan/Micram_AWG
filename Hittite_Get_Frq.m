@@ -1,4 +1,4 @@
-function res = Hittite_Get_Frq(visObj, frqVal)
+function res = Hittite_Get_Frq(visObj)
 % get the output frequency of a Hittite HMC-T2XXX Signal Generator
 % user must ensure that visa connection to HMC-T2XXX is correctly initialised
 % res is array with frq value in units of Hz and GHz respectively
