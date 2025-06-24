@@ -25,17 +25,21 @@ fopen (visObj);
 % Simple menu allows you to operate the Micram AWG continuously
 % Define options for menu
 start = 'Options:\n';
-option1 = 'Initialise DAC4 Input = 1\n'; % Initialise the DAC4, only needs to be run once
-option6 = 'Change Clock Frequency Input = 2\n'; % change clock frequency, units of GHz
-option7 = 'Change Clock Power Input = 3\n'; % change clock power, units of dBm
-option2 = 'Enable Clock Output Input = 4\n'; % switch clock output on
-option3 = 'Disable Clock Output Input = 5\n'; % switch clock output off
-option5 = 'Assign Twin Pulse Parameters Input = 6\n'; % 
-option8 = 'Perform Optical Power Sweep Input = 7\n'; % 
-option4 = 'End program Input = -1\n';
+option1 = 'Initialise DAC4: Input = 1\n'; % Initialise the DAC4, only needs to be run once
+option2 = 'Change Clock Frequency: Input = 2\n'; % change clock frequency, units of GHz
+option3 = 'Change Clock Power: Input = 3\n'; % change clock power, units of dBm
+option4 = 'Enable Clock Output: Input = 4\n'; % switch clock output on
+option5 = 'Disable Clock Output: Input = 5\n'; % switch clock output off
+option6 = 'Assign Twin Pulse Parameters: Input = 6\n'; % 
+option7 = 'Enable DAC4 Twin Pulse Output: Input = 7\n'; % 
+option8 = 'End program: Input = -1\n';
 message = 'Input: ';
 newline = '\n';
-prompt = strcat(newline, start, option1, option6, option7, option2, option3, option5, option8, option4, newline, message);
+prompt = strcat(newline, start, option1, option2, option3, option4, option5, option6, option7, option8, newline, message);
+
+% equipment status labels
+dac4_init = false; % is the dac4 initialised? 
+hmc_status = false; % is the HMC-T2XXX output on? 
 
 % Start continuous operation
 do = true;
@@ -45,66 +49,49 @@ while do
         disp('End Program');
         do = false;
     elseif action == 1
-        disp('Change temperature to some value within specified Bounds')
-        disp(['Low Temperature Bound: ', num2str(Tlimits(1))]);
-        disp(['High Temperature Bound: ', num2str(Tlimits(2))]);
-        Tset = input('Desired Temperature Value: ');
-        CLD1015_Set_TEC_Temp(visObj, Tset)
-        disp(['New temperature value: ', num2str(CLD1015_TEC_Qry_Tval(visObj))]);
+        disp('Initialise DAC4');
+        run("setup_dac4.m"); % call the script to initialise the DAC4
+		dac4_init = true; 
     elseif action==2
-        disp('Switch LDD On')
-        CLD1015_Set_LDD_Status(visObj, 1);
-        cldStatus = CLD1015_Status(visObj); % update the LDD status
+        disp('Change Clock Frequency');
+		freq = input('Input Desired Clock Frequency in units of GHz: '); % input desired frequency in units of GHz
+		Hittite_Set_Frq(visObj, frqVal); 
     elseif action == 3
-        disp('Switch LDD Off')
-        CLD1015_Set_LDD_Status(visObj, 0);
-        cldStatus = CLD1015_Status(visObj); % update the LDD status
+        disp('Change Clock Power');
+		power = input('Input Desired Clock Power in units of dBm: '); % input desired power in units of dBm
+		Hittite_Set_Pow(visObj, power); 
     elseif action == 4
-        disp('Change LDD current to some value within specified Bounds')
-        disp('Low Current Bound: 0.0');
-        disp(['High Current Bound: ', num2str(Ilimit)]);
-        Iset = input('Desired Current Value: ');
-        CLD1015_Set_LDD_Curr(visObj, cldStatus, Iset); 
-        disp(['New Current Value: ', num2str(CLD1015_LDD_Qry_Ival(visObj))]);
-        disp(['New Voltage Value: ', num2str(CLD1015_LDD_Qry_Vval(visObj))]);
+        disp('Enable Clock Output');
+		fprintf (visObj, ':OUTP ON');
+		hmc_status = true; 
     elseif action == 5
-        disp('Reset LDD Current to Zero');
-        CLD1015_Dialdown_LDD_Curr(visObj, cldStatus); 
+        disp('Disable Clock Output');
+		fprintf (visObj, ':OUTP OFF');
+		hmc_status = false; 
     elseif action == 6
-        disp('Power Sweep\n');
-        Is = input('Input Current Start: ');
-        If = input('Input Current End: ');
-        Iinc= input('Input Current increment: ');
-        % sweep the IV data
-        swp_data = CLD1015_LDD_Sweep(visObj, cldStatus, Is, If, Iinc);
-        if size(swp_data(1)) > 1 && size(swp_data(2)) > 1
-            % make a plot of the IV data
-            figure
-            plot(swp_data(1), swp_data(2), 'g--o')
-            xlabel('Current (mA)')
-            ylabel('Voltage (V)')
-        end
+        disp('Assign Twin Pulse Parameters');
     elseif action == 7
-        if include_power_meter
-            % sweep can proceed
-            disp('Power Sweep\n');
-            Is = input('Input Current Start: ');
-            If = input('Input Current End: ');
-            Iinc= input('Input Current increment: ');
-        else
-            disp('Optical power sweep cannot proceed')
-            disp('Thorlabs PM100D has not been initialised')
-        end
+        disp('Enable DAC4 Twin Pulse Output');
+		if hmc_status == false
+			fprintf (visObj, ':OUTP ON'); 
+		end
     else
         action = input(prompt); % Takes you back to start of menu
     end
 end
 
 % STOP PATTERN:
-dac4_pattern_stop( board );
+if dac4_init == true
+	dac4_pattern_stop( board );
+	dac4_init = false; 
+end
 
 %   Close VISA connection
+% turn off the output if you haven't already done so
 disp ('Close VISA connection.');
+if hmc_status == true
+	fprintf (visObj, ':OUTP OFF'); 
+end
 fclose (visObj);
 delete (visObj);
 disp ('Connection closed successfully.');
