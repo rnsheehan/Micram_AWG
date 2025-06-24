@@ -42,9 +42,13 @@ dac4_init = false; % is the dac4 initialised?
 hmc_status = false; % is the HMC-T2XXX output on? 
 
 % some constants for the twin-pulse pattern
-Ni = 10; % no. symbols with which twin-pulse pattern is initialised
+Ni = 10; % no. symbols with which twin-pulse pattern is buffered
 Nw = 5; % no. symbols needed to form pulse of known deltaT
 Nd = 5; % no. symbols needed to form delay between pulses
+
+% set sample rate and the module no. for Micram DAC4
+sample_rate = 100e9; % DAC SR in units of Hz
+module_no = 1; % assign a value to the DAC4 module
 
 % Start continuous operation
 do = true;
@@ -75,11 +79,7 @@ while do
 		hmc_status = false; 
     elseif action == 6
         disp('Enable DAC4 Twin Pulse Output');
-		
-		% set sample rate and the module no. 
-		sample_rate = 100e9; % DAC SR in units of Hz
-		module_no = 1; % assign a value to the DAC4 module
-		
+				
 		if hmc_status == false
 			fprintf (visObj, ':OUTP ON'); 
 		end
@@ -108,13 +108,13 @@ while do
 		
 		% assign the twin-pulse pattern
 		% pattern takes the form of a line of length 256 symbols, repeated 2048 times
-		% line will take the form [ 0 for Ni symbols (placeholder), 63 for Nw symbols (first pulse), 0 for Nd symbols (delay), 63 for Nw symbols (second pulse), 0 for Ni symbols (placeholder), zero padding ]
+		% line will take the form [ 0 for Ni symbols (buffer), 63 for Nw symbols (first pulse), 0 for Nd symbols (delay), 63 for Nw symbols (second pulse), 0 for Ni symbols (buffer), zero padding ]
 		% zero padding is added on at the end of the line by DAC4 to make sure the line length is 256 symbols
 		% the contents of line can be changed as needed
-		placeholder = zeros(1, Ni);
-		pulse = 63 * ones(1, Nw);
-		delay = zeros(1, Nd);
-		line = [placeholder pulse delay pulse placeholder];
+		buffer = zeros(1, Ni); % fixed buffer of zeroes to go at start and end of line
+		pulse = 63 * ones(1, Nw); % pulse of known duration and max output voltage
+		delay = zeros(1, Nd); % delay of known duration
+		line = [buffer pulse delay pulse buffer];
 		
 		% setup DAC4 for operation
 		if dac4_init			
@@ -135,24 +135,20 @@ while do
 	elseif action == 7
         disp('Enable DAC4 Cosine Output');
 		
-		% set sample rate and the module no. 
-		sample_rate = 100e9; % DAC SR in units of Hz
-		module_no = 1; % assign a value to the DAC4 module
-		
 		if hmc_status == false
 			fprintf (visObj, ':OUTP ON'); 
 		end
 		
-		% deltaTw is the width of the pulse that you want to excite the laser
+		% Tell the computer the frequency that you want to output
 		frqVal = input('Input the required output frequency in units of GHz: ');
-		clock_rate = 4.0 * frqVal; 
-		Hittite_Set_Frq(visObj, clock_rate); % output from DAC4 is clock-rate / 4
+		clock_rate = 4.0 * frqVal; % change the clock-freq to the correct value because output from DAC4 is clock-rate / 4
+		Hittite_Set_Frq(visObj, clock_rate); % adjust the clock-rate
 		crhz, crghz = Hittite_Get_Freq(visObj); % read the actual clock rate
 		fprintf('Current Clock Frequency: %0.3f GHz\n',crghz);
 		
 		no_cosine_cycles_p = 3;
 		pat_length_m = floor( no_cosine_cycles_p*(sample_rate/crhz) ); 
-		fprintf('fout = %f\n',crghz);
+		fprintf('Fout = %f\n',frqVal);
 		fprintf('No. Cosine Cycles P = %d\n',no_cosine_cycles_p);
 		fprintf('Pattern Length M = %d\n',pat_length_m);
 		
@@ -171,8 +167,7 @@ while do
 			% start outputting the pattern
 			% pattern should continue until you tell the code to stop
 			dac4_pattern_load(board, module_no, pattern_cosine(pat_length_m, no_cosine_cycles_p) );		
-		end
-		
+		end		
     else
         action = input(prompt); % Takes you back to start of menu
     end
