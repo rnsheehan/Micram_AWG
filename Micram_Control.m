@@ -23,7 +23,7 @@ fopen (visObj);
 %set (visObj, 'EOSMode', 'read');
 
 % equipment status labels
-dac4_init = false; % is the dac4 initialised? 
+dac4_status = false; % is the dac4 initialised? 
 hmc_status = false; % is the HMC-T2XXX output on? 
 
 % Initialise the DAC4 when calling the script for the first time
@@ -74,7 +74,7 @@ if initialise_dac4 == 1
 
 	board_init( board );
 	
-	dac4_init = true; 
+	dac4_status = true; 
 end
 
 % Simple menu allows you to operate the Micram AWG continuously
@@ -111,7 +111,7 @@ while do
     %elseif action == 1
     %    disp('Initialise DAC4');
     %    run("setup_dac4.m"); % call the script to initialise the DAC4
-	%	dac4_init = true; 
+	%	dac4_status = true; 
     elseif action==2
         disp('Change Clock Frequency');
 		freq = input('Input Desired Clock Frequency in units of GHz: '); % input desired frequency in units of GHz
@@ -168,7 +168,7 @@ while do
 		line = [buffer pulse delay pulse buffer];
 		
 		% setup DAC4 for operation
-		if dac4_init			
+		if dac4_status == true
 			% set sample rate
 			dac4_set_samplerate( board, md.(board).devs, sample_rate)
 			dac4_swing_set( board, md.(board).devs, 500);
@@ -204,7 +204,7 @@ while do
 		fprintf('Pattern Length M = %d\n',pat_length_m);
 		
 		% setup DAC4 for operation
-		if dac4_init			
+		if dac4_status == true
 			% set sample rate
 			dac4_set_samplerate( board, md.(board).devs, sample_rate)
 			dac4_swing_set( board, md.(board).devs, 500);
@@ -225,9 +225,9 @@ while do
 end
 
 % STOP PATTERN:
-if dac4_init == true
+if dac4_status == true
 	dac4_pattern_stop( board );
-	dac4_init = false; 
+	dac4_status = false; 
 end
 
 %   Close VISA connection
