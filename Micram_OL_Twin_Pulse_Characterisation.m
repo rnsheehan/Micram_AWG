@@ -18,7 +18,7 @@ global md;
 % some constants for the twin-pulse pattern
 Ni = 10; % no. symbols with which twin-pulse pattern is buffered
 Nw = 5; % no. symbols needed to form pulse of known deltaT
-Nd = 5; % no. symbols needed to form delay between pulses
+Nd = 2*Nw; % no. symbols needed to form delay between pulses
 
 % set sample rate and the module no. for Micram DAC4
 sample_rate = 100e9; % DAC SR in units of Hz
@@ -28,29 +28,35 @@ disp('Enable DAC4 Twin Pulse Output');
 
 % start inputting some values
 % deltaTw is the width of the pulse that you want to excite the laser
-deltaTw = input('Input the required pulse width in units of pico-second: ');
+%deltaTw = input('Input the required pulse width in units of pico-second: ');
 
 % deltaTd is the length of the delay that you want between the pulses
-deltaTd = input('Input the required time-delay between pulses in units of pico-second: ');
+%deltaTd = input('Input the required time-delay between pulses in units of pico-second: ');
 
 % owing to the manner in which the pattern is sent to the DAC4
 % it is not actually a requirement that deltaTd > deltaTw
 
 % compute the clock-rate needed to generate the pulse of width deltaTw
-crghz = Micram_Get_Twin_Pulse_Clock_Rate(Nw, deltaTw);
+%crghz = Micram_Get_Twin_Pulse_Clock_Rate(Nw, deltaTw);
+crghz = 12.5 ; % As CR is set manually this has no bearing on the actual DAC4 device
 fprintf('Desired Clock Frequency: %0.3f GHz\n',crghz);
-
-% force the script to pause while you change the clock frequency to the
-% desired rate
-xx = input('Have you updated the clock frequency? '); 
 
 % compute the number of symbols needed to generate the delay of width deltaTd
 % remember that the clock-rate must now be kept constant to ensure pulses of width deltaTw
 % the manner in which Nd is computed means that the minimum default delay will actually be deltaTw
 % it should be possible to change this constraint in the future if needed
 % R. Sheehan 24 - 6 - 2025
-Nd = Micram_Get_Twin_Pulse_Delay_Symbols(crghz, deltaTd); 
-fprintf('Number of symbols in the delay')
+%Nd = Micram_Get_Twin_Pulse_Delay_Symbols(crghz, deltaTd); 
+fprintf('Number of symbols in the delay %d\n',Nd);
+
+% Compute the size of the buffer
+buf_2 = 256 - 2*Nw - Nd; 
+if mod(buf_2, 2) == 0
+    Ni = buf_2 / 2; % buf_2 is even
+else
+    Ni = (buf_2-1) / 2; % buf_2 is odd, change it to nearest even
+end
+fprintf('Number of symbols in the buffer %d\n',Ni);
 
 % assign the twin-pulse pattern
 % pattern takes the form of a line of length 256 symbols, repeated 2048 times

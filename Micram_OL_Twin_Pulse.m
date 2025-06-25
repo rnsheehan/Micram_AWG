@@ -17,8 +17,8 @@ global md;
 
 % some constants for the twin-pulse pattern
 Ni = 10; % no. symbols with which twin-pulse pattern is buffered
-Nw = 5; % no. symbols needed to form pulse of known deltaT
-Nd = 5; % no. symbols needed to form delay between pulses
+Nw = 6; % no. symbols needed to form pulse of known deltaT
+Nd = 12; % no. symbols needed to form delay between pulses
 
 % set sample rate and the module no. for Micram DAC4
 sample_rate = 100e9; % DAC SR in units of Hz

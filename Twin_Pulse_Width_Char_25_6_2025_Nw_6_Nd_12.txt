@@ -1,0 +1,23 @@
+# Measurement of the Odhran Liston Twin-Pulse Parameters
+# R. Sheehan 25 - 6 - 2025
+# Clock: HMC-T2270
+# Clock input Power: +2dBm
+# Pattern Nw = 6, Nd = 12, Ni = 116
+# Scope: Tektronix DPO73304DX, SR 50GS/s, vertical 70mV/div
+# Clock-Frequency (GHz), Pulse Width (ps), Resolution (ps / div), Delay Width (ps), Resolution (ps / div)
+2, 1506, 417, 3026, 1670
+4, 756.6, 417, 1513, 833
+6, 502.6, 167, 1048, 418
+8, 385.9, 167, 756.5, 417
+10, 319.3, 167, 631.5, 417
+12, 251.3, 83.3, 506.4, 417
+14, 218, 83.3, 464.8, 417
+16, 186, 167, 369.3, 167
+18, 176.3, 83.3, 336, 167
+20, 160, 83.3, 286, 167
+22, 143, 83.3, 269.3, 167
+24, 118, 83.3, 253, 167
+# Problems generating 2nd pulse of equal height from here
+# Data not trustworthy
+# 26, 101.3, 83.3, 219.3, 167 
+# 28, 109.6, 83.3, 
