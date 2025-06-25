@@ -5,6 +5,10 @@
 % More functionality can be added at a later date
 % R. Sheehan 24 - 6 - 2025
 
+% Seems like you need to add MATLAB files to MATLAB system path
+%addpath(genpath('c:/Users/Robert/Programming/MATLAB/Micram_AWG/')); 
+%cd('c:/Users/Robert/Programming/MATLAB/Micram_AWG/'); 
+
 % Unclear if I'm allowed to post Micram GmbH MATLAB code on github so I won't
 % Add the search path directly
 % You may need to change this for your system
@@ -12,7 +16,7 @@ addpath(genpath('c:/Users/Robert/Equipment/Equipment_Manuals/Micram/DAC4_1.5/'))
 
 % In Tyndall Lab C.109 there are two Hittite SG
 hit_addr1 = 'GPIB0::15::INSTR'; % HMC-T2100 10MHz - 20GHz 
-hit_addr2 = 'GPIB0::29::INSTR'; % HMC-T2270 10MHz - 70GHz
+hit_addr2 = 'GPIB0::29::INSTR'; % HMC-T2270 10MHz - 70GHz1
 hit_vendor = 'NI'; 
 
 % Open VISA connection and set parameters for HMC-T2XXX
@@ -115,7 +119,7 @@ while do
     elseif action==2
         disp('Change Clock Frequency');
 		freq = input('Input Desired Clock Frequency in units of GHz: '); % input desired frequency in units of GHz
-		Hittite_Set_Frq(visObj, frqVal); 
+		Hittite_Set_Frq(visObj, freq); 
     elseif action == 3
         disp('Change Clock Power');
 		power = input('Input Desired Clock Power in units of dBm: '); % input desired power in units of dBm

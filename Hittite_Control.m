@@ -5,16 +5,16 @@
 % R. Sheehan 19 - 6 - 2025
 
 % In Tyndall Lab C.109 there are two Hittite SG
-hit_addr1 = 'GPIB0::15::INSTR'; % HMC-T2100 10MHz - 20GHz 
+%hit_addr1 = 'GPIB0::15::INSTR'; % HMC-T2100 10MHz - 20GHz 
 hit_addr2 = 'GPIB0::29::INSTR'; % HMC-T2270 10MHz - 70GHz
 hit_vendor = 'NI'; 
 
 % Open VISA connection and set parameters for HMC-T2XXX
-visObj = visa (hit_vendor, hit_addr1);
+visObj = visa (hit_vendor, hit_addr2);
 fopen (visObj);
 
-%set (visObj, 'Timeout', 10);
-%set (visObj, 'EOSMode', 'read');
+set (visObj, 'Timeout', 10);
+set (visObj, 'EOSMode', 'read');
 
 % Attempt to make a query of the device
 units = 'GHz'; % specify what units the frequency output should be
