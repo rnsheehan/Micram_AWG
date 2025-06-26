@@ -19,5 +19,11 @@
 24, 109.3, 83.3, 401.9, 167
 # Problems generating 2nd pulse of equal height from here
 # Data not trustworthy
+# Almost looks like pattern starts to become unstable
+# Lots of jitter between 25 GHz and 29 GHz
+# then signal looks like it makes a return to stability
 # 26, 100.9, 83.3, 401.9, 167 
 # 28, 100.9, 83.3, 
+#30, 84.3, 83.3, 342.6, 83.3
+#31, 84.3, 83.3, 326, 83.3
+# what do the results look like for pure square wave output? 
